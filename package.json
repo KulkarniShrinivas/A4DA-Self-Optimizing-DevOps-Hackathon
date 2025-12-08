@@ -4,15 +4,13 @@
   "description": "A self-optimizing DevOps system integrating Cline, Kestra, Oumi, Vercel, and CodeRabbit.",
   "main": "index.html",
   "scripts": {
-    "start": "echo 'Starting A4DA Dashboard...' && serve public -s",
-    "build": "echo 'Building static files...' && mkdir -p build && cp public/index.html build/",
-    "deploy": "vercel deploy --prebuilt"
+    "start": "echo 'Starting A4DA Dashboard...' && serve . -s",
+    "build": "echo 'Building static files...' && mkdir -p build && cp index.html build/"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
+    "react-dom": "^18.2.0",
     "serve": "^14.2.3"
-  }
+  },
+  "devDependencies": {}
 }
