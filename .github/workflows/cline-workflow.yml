@@ -1,0 +1,90 @@
+name: A4DA Autonomous Pipeline (Cline Integration)
+
+on:
+  push:
+    branches:
+      - main # Runs after merge to main
+  workflow_dispatch: # Allows manual testing
+
+jobs:
+  run-cline-automation:
+    name: 1. Deploy & Trigger Data Flow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CLIs & jq
+        run: |
+          npm install -g cline
+          npm install -g vercel
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run Cline Deployment Workflow
+        # Executes the custom script, passing the credentials for JWT generation
+        run: |
+          chmod +x .github/scripts/deploy_and_trigger.sh
+          chmod +x .github/scripts/get_kestra_jwt.sh
+          cline run .github/scripts/deploy_and_trigger.sh
+        env:
+            CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }} 
+            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} 
+            KESTRA_USERNAME: ${{ secrets.KESTRA_USERNAME }} 
+            KESTRA_PASSWORD: ${{ secrets.KESTRA_PASSWORD }} 
+            KESTRA_BASE_URL: ${{ secrets.KESTRA_BASE_URL }} 
+            GITHUB_SHA: ${{ github.sha }}
+
+  autofix-job:
+    name: 2. Autonomous Code Style Fixer
+    runs-on: ubuntu-latest
+    needs: run-cline-automation 
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CLIs & jq
+        run: |
+          npm install -g cline
+          npm install -g @github/cli
+          sudo apt-get update
+          sudo apt-get install -y jq
+          npm install -g @github/cli 
+          sudo apt-get install -y jq
+
+      - name: Configure Git User
+        run: |
+          git config user.name "A4DA-AutoFix-Agent"
+          git config user.email "a4da-agent@hackathon.com"
+
+      - name: Run Cline AutoFix Agent and Create PR
+        # Demonstrates autonomous code fix/PR creation, a high-value capability.
+        run: |
+          BRANCH_NAME="autofix/${{ github.run_number }}"
+          git checkout -b "$BRANCH_NAME"
+
+          # Ask Cline to fix style issues, commit to the new branch
+          cline ask --model gpt-4o "Find and fix all code style issues in ./src/utils.js. Commit the changes to the current branch."
+
+          # Push the changes
+          git push -u origin $BRANCH_NAME
+
+          # Create Pull Request using gh CLI
+          gh pr create \
+            --title "🤖 A4DA AutoFix: Autonomous Code Style Correction" \
+            --body "The Cline AutoFix Agent detected and fixed code style issues in 'src/utils.js'. This demonstrates the A4DA's autonomous maintenance capability." \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --repo ${{ github.repository }}
+        env:
+          CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }} 
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_FOR_PR }}
