@@ -26,10 +26,10 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Run Cline Deployment Workflow
-        # Added explicit 'cline auth' and '--yolo' flag to prevent TTY error
+       
         run: |
           # 1. Authenticate Cline non-interactively using the secret API key
-          cline auth --api-key ${{ secrets.CLINE_API_KEY }} --yolo
+          cline auth --apikey ${{ secrets.CLINE_API_KEY }} --yolo 
           
           # 2. Set executable permissions
           chmod +x .github/scripts/deploy_and_trigger.sh
