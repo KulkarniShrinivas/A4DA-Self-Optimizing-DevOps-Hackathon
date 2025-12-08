@@ -1,0 +1,26 @@
+# 1. DEPENDENCIES
+node_modules/
+package-lock.json
+
+# 2. ENVIRONMENT SECRETS
+.env
+.env.local
+.env.development
+.env.production
+secrets.json
+
+# 3. BUILD ARTIFACTS AND OUTPUTS
+/dist
+/build
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# 4. SYSTEM FILES
+.DS_Store
+Thumbs.db
+
+# 5. IDE AND TOOLING
+.vscode/
+.idea/
+.history 
