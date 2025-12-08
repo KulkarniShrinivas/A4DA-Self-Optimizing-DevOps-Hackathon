@@ -26,16 +26,14 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Run Cline Deployment Workflow
-       
+      
         run: |
-          # 1. Authenticate Cline non-interactively using the secret API key
-          cline auth --apikey ${{ secrets.CLINE_API_KEY }} --yolo 
           
-          # 2. Set executable permissions
+          cline auth --apikey ${{ secrets.CLINE_API_KEY }} 
+          
           chmod +x .github/scripts/deploy_and_trigger.sh
           chmod +x .github/scripts/get_kestra_jwt.sh
           
-          # 3. Run the custom script in non-interactive mode
           cline run .github/scripts/deploy_and_trigger.sh --yolo
         env:
           CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }} 
