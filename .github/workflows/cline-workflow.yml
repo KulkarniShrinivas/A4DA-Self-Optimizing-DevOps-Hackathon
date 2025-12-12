@@ -3,8 +3,8 @@ name: A4DA Autonomous Pipeline (Cline Integration)
 on:
   push:
     branches:
-      - main # Runs after merge to main
-  workflow_dispatch: # Allows manual testing
+      - main
+  workflow_dispatch:
 
 jobs:
   run-cline-automation:
@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js & Install CLIs
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install CLIs & jq
+      - name: Install Dependencies
         run: |
           npm install -g cline
           npm install -g vercel
@@ -26,10 +26,9 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Run Cline Deployment Workflow
-      
         run: |
-          
-          cline auth --apikey ${{ secrets.CLINE_API_KEY }} 
+          # FINAL FIX FOR AUTH: Must include provider and model ID
+          cline auth --apikey ${{ secrets.CLINE_API_KEY }} --provider openai-native --modelid gpt-4o
           
           chmod +x .github/scripts/deploy_and_trigger.sh
           chmod +x .github/scripts/get_kestra_jwt.sh
@@ -51,33 +50,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Node.js
+          token: ${{ secrets.GH_TOKEN_FOR_PR }} # Use PAT token here for PR creation
+          
+      - name: Setup Node.js & Install CLIs
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install CLIs & jq
+      - name: Install Dependencies
         run: |
           npm install -g cline
           npm install -g @github/cli
           sudo apt-get update
           sudo apt-get install -y jq
-          npm install -g @github/cli 
-          sudo apt-get install -y jq
-
+      
       - name: Configure Git User
         run: |
           git config user.name "A4DA-AutoFix-Agent"
           git config user.email "a4da-agent@hackathon.com"
 
       - name: Run Cline AutoFix Agent and Create PR
-        # Demonstrates autonomous code fix/PR creation, a high-value capability.
         run: |
+          # FIX: Authenticate Cline for the 'ask' command
+          cline auth --apikey ${{ secrets.CLINE_API_KEY }} --provider openai-native --modelid gpt-4o
+          
           BRANCH_NAME="autofix/${{ github.run_number }}"
           git checkout -b "$BRANCH_NAME"
 
           # Ask Cline to fix style issues, commit to the new branch
-          cline ask --model gpt-4o "Find and fix all code style issues in ./src/utils.js. Commit the changes to the current branch."
+          cline ask --model gpt-4o "Find and fix all code style issues in ./src/utils.js. Commit the changes to the current branch." --yolo
 
           # Push the changes
           git push -u origin $BRANCH_NAME
@@ -91,4 +92,4 @@ jobs:
             --repo ${{ github.repository }}
         env:
           CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }} 
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_FOR_PR }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_FOR_PR }} # gh CLI uses GITHUB_TOKEN ENV variable
