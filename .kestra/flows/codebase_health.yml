@@ -1,22 +1,24 @@
 id: A4DA_CodeHealth
 namespace: devops.a4da
-description: >
+description: |
   The core intelligence flow. Fetches GitHub PR data, uses the AI Agent to summarize code quality 
-  and generates the reward signal and a unique narrative.
+  and generates the reward signal and a unique narrative. This closes the RL feedback loop for the Oumi Agent.
 
 inputs:
   - id: githubSha
     type: STRING
     description: The commit SHA passed by the Cline CLI trigger.
 
+
 tasks:
   - id: fetch_pr_data
     type: io.kestra.plugin.fs.http.Request
-    description: Fetches the PR/commit data from GitHub using a read-only token.
+    description: Fetches the PR/commit data from GitHub using a read-only token and flow inputs.
+    
+   
     url: "https://api.github.com/repos/{{ env.GITHUB_REPOSITORY }}/commits/{{ inputs.githubSha }}/pulls"
     method: GET
     headers:
-      # Kestra internal secret, configured via Base64 ENV
       Authorization: "token {{ secret('GITHUB_PAT_READ') }}" 
 
   - id: analyze_and_reward
@@ -38,7 +40,7 @@ tasks:
       
       Output a single JSON object that must contain three elements: reward_signal (float 0.0 to 1.0), summary (string), and code_lore_narrative (string).
     
-    outputFormat: # Ensures Oumi receives structured data
+    outputFormat: 
       type: JSON
       jsonSchema: |
         {
@@ -53,9 +55,11 @@ tasks:
         
   - id: send_reward_to_oumi
     type: io.kestra.plugin.fs.http.Request
-    description: Sends the calculated reward signal to the Oumi RL training server (Step 4).
+    description: Sends the calculated reward signal (JSON output from the AI) to the Oumi RL training server (Step 4).
     url: "{{ secret('OUMI_RL_TRAINING_ENDPOINT') }}" 
     method: POST
     headers:
       Content-Type: "application/json"
+    
+  
     body: "{{ outputs.analyze_and_reward.jsonOutput }}"
