@@ -45,7 +45,13 @@ jobs:
   autofix-job:
     name: 2. Autonomous Code Style Fixer
     runs-on: ubuntu-latest
-    needs: run-cline-automation 
+    needs: run-cline-automation
+    
+    # CRITICAL FIX 1: Add permissions block to grant GITHUB_TOKEN package read access
+    permissions:
+      contents: write 
+      packages: read
+      
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,6 +69,10 @@ jobs:
           npm install -g @github/cli
           sudo apt-get update
           sudo apt-get install -y jq
+        
+     
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Configure Git User
         run: |
@@ -92,6 +102,7 @@ jobs:
             --repo ${{ github.repository }}
         env:
           CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }}
+
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_FOR_PR }} 
 
   notify-completion:
@@ -104,4 +115,3 @@ jobs:
           echo "A4DA Autonomous Pipeline (Cline Integration) has completed successfully."
         env:
           NOTIFICATION_WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK_URL }}
-          
