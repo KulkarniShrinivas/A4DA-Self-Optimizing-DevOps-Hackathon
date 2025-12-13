@@ -72,7 +72,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
         
-   
+      # Removed unnecessary NODE_AUTH_TOKEN line here as it was unused and confusing
 
       - name: Configure Git User
         run: |
