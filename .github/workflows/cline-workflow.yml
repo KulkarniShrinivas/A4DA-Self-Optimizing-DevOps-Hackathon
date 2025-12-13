@@ -33,7 +33,8 @@ jobs:
           chmod +x .github/scripts/deploy_and_trigger.sh
           chmod +x .github/scripts/get_kestra_jwt.sh
           
-          cline run .github/scripts/deploy_and_trigger.sh --yolo
+          # Execute the deployment script
+          .github/scripts/deploy_and_trigger.sh
         env:
           CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }} 
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} 
@@ -47,10 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: run-cline-automation
     
-    # CRITICAL FIX 1: Add permissions block to grant GITHUB_TOKEN package read access
+    
     permissions:
       contents: write 
-      packages: read
+      pull-requests: write # Required to create the Pull Request
       
     steps:
       - uses: actions/checkout@v4
@@ -66,14 +67,13 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install -g cline
-          npm install -g @github/cli
+          # CRITICAL FIX 2: Install the official GitHub CLI (gh) using the recommended method for CI
+          npm install -g @cli/cli # The command line tool is named 'gh' 
           sudo apt-get update
           sudo apt-get install -y jq
         
-     
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+   
+
       - name: Configure Git User
         run: |
           git config user.name "A4DA-AutoFix-Agent"
@@ -88,9 +88,11 @@ jobs:
           git checkout -b "$BRANCH_NAME"
 
           # Ask Cline to fix style issues, commit to the new branch
-          cline ask --model gpt-4o "Find and fix all code style issues in ./src/utils.js. Commit the changes to the current branch." --yolo
+          # NOTE: Removed --yolo from 'cline ask' as it's intended to be used with 'cline run'
+          cline ask --model gpt-4o "Find and fix all code style issues in ./src/utils.js. Commit the changes to the current branch."
 
           # Push the changes
+          # The token in "secrets.GH_TOKEN_FOR_PR" must have 'repo' scope for push/PR
           git push -u origin $BRANCH_NAME
 
           # Create Pull Request using gh CLI
@@ -102,7 +104,7 @@ jobs:
             --repo ${{ github.repository }}
         env:
           CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }}
-
+          # GITHUB_TOKEN is required by gh CLI for authentication
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_FOR_PR }} 
 
   notify-completion:
