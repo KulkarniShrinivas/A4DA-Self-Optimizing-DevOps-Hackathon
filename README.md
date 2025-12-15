@@ -138,7 +138,13 @@ The ultimate proof is a push to `main`, which triggers the full CI/CD loop:
 
   * **Shrinivas Kulkarni** (Developer)
 
+  
+
 Thank you to the sponsors **Cline**, **Kestra**, **Oumi**, **Vercel**, and **CodeRabbit** for powering this autonomous system\!
+
+
+
+https://github.com/user-attachments/assets/6452677d-9375-4cec-9185-d1ab280ad64a
 
 
 
