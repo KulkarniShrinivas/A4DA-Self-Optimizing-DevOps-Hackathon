@@ -140,6 +140,5 @@ The ultimate proof is a push to `main`, which triggers the full CI/CD loop:
 
 Thank you to the sponsors **Cline**, **Kestra**, **Oumi**, **Vercel**, and **CodeRabbit** for powering this autonomous system\!
 
-The video below explains how to format your code blocks in Markdown, which is essential for a professional README file. [Code Blocks + Syntax Highlighting — Mastering Markdown](https://www.youtube.com/watch?v=9eucl-HyNAM)
 
-http://googleusercontent.com/youtube_content/3
+
