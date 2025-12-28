@@ -57,12 +57,11 @@ cd A4DA-Self-Optimizing-DevOps-Hackathon
 The Kestra flow requires several secrets to be passed via Docker. **Flow secrets must be Base64-encoded**.
 
 ```bash
-# 1. Base64 Encode the flow secrets (replace YOUR_VALUES)
+
 export GITHUB_PAT_READ_ENCODED=$(echo -n "ghp_YOUR_GITHUB_PAT" | base64 -w 0)
 export OPENAI_KEY_ENCODED=$(echo -n "sk-YOUR_OPENAI_KEY" | base64 -w 0)
 export OUMI_ENDPOINT_ENCODED=$(echo -n "http://127.0.0.1:5000/reward" | base64 -w 0)
 
-# 2. Define Kestra Login Credentials
 export KESTRA_USERNAME="YOUR_KESTRA_USERNAME"
 export KESTRA_PASSWORD="YOUR_KESTRA_PASSWORD"
 ```
@@ -75,7 +74,7 @@ This starts the Python server that receives the final reward signal.
 # Install Python dependencies
 pip install -r a4da_oumi_server/requirements.txt
 
-# Start the server (MUST remain running throughout the test)
+# Start the server 
 cd a4da_oumi_server
 python llm_server.py
 ```
